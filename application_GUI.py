@@ -35,7 +35,6 @@ class AppGUI(QMainWindow):
         self.create_input_boxes()
         self.main_layout.addSpacing(20)
         self.create_image()
-        #self.main_layout.setSpacing(20)
 
     def create_input_boxes(self):
         # Create grid layout
