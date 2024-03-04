@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QPixmap
 
 
-WINDOW_WIDTH = 800
+WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 400
 LINE_HEIGHT = 50
 
@@ -25,24 +25,60 @@ class AppGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("MSA data processing")
-        self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
+        #self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.main_layout = QHBoxLayout()
         central_widget = QWidget(self)
         central_widget.setLayout(self.main_layout)
         self.setCentralWidget(central_widget)
+        self.main_layout.setContentsMargins(20, 20, 20, 20)
 
-        self.create_datataker()
+        self.create_input_boxes()
+        self.main_layout.addSpacing(20)
         self.create_image()
-    
-    def create_datataker(self):
-        self.form_layout = QFormLayout()
-        #Add rows with labels, line edits, and buttons
-        self.add_row_with_button("TOP side data:", "enter path")
-        self.add_row_with_button("TOP designators:", "list the designators")
-        self.add_row_with_button("BOP side data:", "enter path")
-        self.add_row_with_button("BOP designators:", "list the designators")
+        #self.main_layout.setSpacing(20)
 
-        self.main_layout.addLayout(self.form_layout)
+    def create_input_boxes(self):
+        # Create grid layout
+        self.grid_layout = QGridLayout()
+        self.grid_layout.setSpacing(10)
+        
+        # Add Input Boxes in the first column
+        label1 = QLabel("Input data for the TOP side:")
+        self.input_box1 = QLineEdit(self)
+
+        label2 = QLabel("Input list of the designators for the TOP side:")
+        self.input_box2 = QLineEdit(self)
+
+        label3 = QLabel("Input data for the BOT side:")
+        self.input_box3 = QLineEdit(self)
+
+        label4 = QLabel("Input list of the designators for the BOT side:")
+        self.input_box4 = QLineEdit(self)
+
+        self.grid_layout.addWidget(label1, 0, 0)
+        self.grid_layout.addWidget(self.input_box1, 0, 1)
+
+        self.grid_layout.addWidget(label2, 1, 0)
+        self.grid_layout.addWidget(self.input_box2, 1, 1, 1, 2)
+
+        self.grid_layout.addWidget(label3, 2, 0)
+        self.grid_layout.addWidget(self.input_box3, 2, 1)
+
+        self.grid_layout.addWidget(label4, 3, 0)
+        self.grid_layout.addWidget(self.input_box4, 3, 1, 1, 2)
+
+        # Add Buttons in the second column
+        self.button1 = QPushButton("SEARCH", self)
+        self.button2 = QPushButton("SEARCH", self)
+        button3 = QPushButton("CREATE", self)
+        button4 = QPushButton("CLEAR", self)
+
+        self.grid_layout.addWidget(self.button1, 0, 2)
+        self.grid_layout.addWidget(self.button2, 2, 2)
+        self.grid_layout.addWidget(button3, 4, 1)
+        self.grid_layout.addWidget(button4, 4, 2)
+
+        self.main_layout.addLayout(self.grid_layout)
 
     def create_image(self):
         self.pattern_image = QLabel()
@@ -54,21 +90,6 @@ class AppGUI(QMainWindow):
         pixmap = pixmap.scaled(450, 250)
         self.pattern_image.setPixmap(pixmap)
         self.main_layout.addWidget(self.pattern_image)
-
-    def add_row_with_button(self, label_text, placeholder_text):
-        label = label_text
-        line_edit = QLineEdit()
-        line_edit.setPlaceholderText(placeholder_text)
-
-        button = QPushButton("Action")
-        button.clicked.connect(lambda: self.on_button_clicked(line_edit))
-
-        self.form_layout.addRow(label, line_edit)
-        self.form_layout.addWidget(button)
-
-    def on_button_clicked(self, line_edit):
-        text = line_edit.text()
-        print(f"Button clicked! Text in the line edit: {text}")
 
     def select_file(self):
         #Get the button that triggered the event
