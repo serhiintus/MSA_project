@@ -130,6 +130,9 @@ class AppController:
             if key.find("input") != -1:
                 self.view.input_boxes[key].clear()
 
+    def export_data(self):
+        pass
+
     def connect_signals_and_slots(self):
         self.view.button1.clicked.connect(self.select_file)
         self.view.button2.clicked.connect(self.select_file)
