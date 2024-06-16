@@ -73,7 +73,3 @@ columns_with_data = {
 }
 tolerance_data = pd.DataFrame(columns_with_data)
 
-#export MSA and tolerance dataframes to the Excel
-with pd.ExcelWriter('MSA_data.xlsx', engine='xlsxwriter') as writer:
-    msa_data.to_excel(writer, sheet_name='Sheet1', startrow=0, startcol=0, index=False)
-    tolerance_data.to_excel(writer, sheet_name='Sheet1', startrow=0, startcol=len(msa_data.columns) + 2, index=False)

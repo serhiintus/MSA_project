@@ -195,8 +195,8 @@ class AppController:
     def create_excel(self):
         top_csv = self.view.input_boxes["input1"].text()
         bot_csv = self.view.input_boxes["input3"].text()
-        components_top = self.input_boxes["input2"].text().upper()
-        components_bot = self.input_boxes["input4"].text().upper()
+        components_top = self.view.input_boxes["input2"].text().upper().split(',')
+        components_bot = self.view.input_boxes["input4"].text().upper().split(',')
 
         self.exporter.create_msa_df()
 
@@ -209,7 +209,7 @@ class AppController:
 
         components = components_top + components_bot
         if components:
-            self.exporter.create_tolerance_df()
+            self.exporter.create_tolerance_df(components)
             self.exporter.export_data()
 
     def connect_signals_and_slots(self):
