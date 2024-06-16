@@ -1,3 +1,4 @@
+import pandas as pd
 import sys
 import os
 from PyQt6.QtWidgets import (
@@ -22,8 +23,10 @@ LINE_HEIGHT = 50
 BUTTON_WIDTH = 100
 BUTTON_HEIGHT = 25
 
+
 class AppGUI(QMainWindow):
     """Application's GUI"""
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("MSA data processing")
@@ -100,9 +103,68 @@ class AppGUI(QMainWindow):
         self.main_layout.addWidget(self.pattern_image)
 
 
+class ExcelCreator:
+
+    def __init__(self, df_columns = ["OffsetX", "OffsetY"], modules = 5, tests = 9) -> None:
+        self.df_columns = df_columns
+        self.modules = modules
+        self.tests = tests
+
+    def create_msa_df(self):
+        self.columns_for_msa_data = {
+            'Operator': [1 for i in range(self.modules*self.tests)],
+            'Part': [i+1 for i in range(self.modules) for j in range(self.tests)]
+        }
+        self.msa_data = pd.DataFrame(self.columns_for_msa_data)
+
+    def csv_reader(self, path):
+        df = pd.read_csv(path)
+        return df
+    
+    def data_filter(self, df, components, side):
+        for i in components:
+            #create a temporary dataframe
+            filtered_data = pd.DataFrame(columns=self.df_columns)
+
+            for j in range(self.modules):
+                #create filter
+                filt = (df["ModuleID"] == j + 1) & (df["Location Name"] == i)
+                #filtered data from the .csv file and add it to the temporary dataframe
+                filtered_data = pd.concat([filtered_data, df.loc[filt, self.df_columns].iloc[:9]], ignore_index=True)
+
+            column_mapping = {
+                self.df_columns[0]: f"{side}_{i}_X",
+                self.df_columns[1]: f"{side}_{i}_Y"
+            }
+            #rename the columns and update the values of the temporary dataframe
+            filtered_data = filtered_data.rename(columns=column_mapping).apply(lambda x: x/1000)
+            #concatenate the MSA dataframe and the temporary dataframe with renaming columns of the temporary dataframe
+            self.msa_data = pd.concat([self.msa_data, filtered_data], axis=1)
+
+    def create_tolerance_df(self, components):
+        n = len(components)
+        columns_with_data = {
+            'Desygnator': components,
+            'Obudowa': ['none' for i in range(n)],
+            'Tolerancja X': [0 for i in range(n)],
+            'Tolerancja Y': [0 for i in range(n)]
+        }
+        self.tolerance_data = pd.DataFrame(columns_with_data)
+
+    def export_data(self):
+        #export MSA and tolerance dataframes to the Excel
+        with pd.ExcelWriter('MSA_data.xlsx', engine='xlsxwriter') as writer:
+            self.msa_data.to_excel(writer, sheet_name='Sheet1', startrow=0, startcol=0, index=False)
+            self.tolerance_data.to_excel(writer, sheet_name='Sheet1', startrow=0, startcol=len(self.msa_data.columns) + 2, index=False)
+
+    
+
+
 class AppController:
-    def __init__(self, view):
+
+    def __init__(self, view, exporter):
         self.view = view
+        self.exporter = exporter
         self.connect_signals_and_slots()
 
     def select_file(self):
@@ -130,20 +192,40 @@ class AppController:
             if key.find("input") != -1:
                 self.view.input_boxes[key].clear()
 
-    def export_data(self):
-        pass
+    def create_excel(self):
+        top_csv = self.view.input_boxes["input1"].text()
+        bot_csv = self.view.input_boxes["input3"].text()
+        components_top = self.input_boxes["input2"].text().upper()
+        components_bot = self.input_boxes["input4"].text().upper()
+
+        self.exporter.create_msa_df()
+
+        if top_csv and components_top:
+            top_data = self.exporter.csv_reader(top_csv)
+            self.exporter.data_filter(top_data, components_top, "TOP")
+        if bot_csv and components_bot:
+            bot_data = self.exporter.csv_reader(bot_csv)
+            self.exporter.data_filter(bot_data, components_bot, "BOT")
+
+        components = components_top + components_bot
+        if components:
+            self.exporter.create_tolerance_df()
+            self.exporter.export_data()
 
     def connect_signals_and_slots(self):
         self.view.button1.clicked.connect(self.select_file)
         self.view.button2.clicked.connect(self.select_file)
+        self.view.button3.clicked.connect(self.create_excel)
         self.view.button4.clicked.connect(self.clear_data)
 
 def main():
     app = QApplication([])
     appGui = AppGUI()
     appGui.show()
+    appLogic = ExcelCreator()
     appController = AppController(
-        view=appGui
+        view=appGui,
+        exporter = appLogic
     )
     sys.exit(app.exec())
 
