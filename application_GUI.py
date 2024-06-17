@@ -192,11 +192,18 @@ class AppController:
             if key.find("input") != -1:
                 self.view.input_boxes[key].clear()
 
+    def cleanup_userinput(self, user_input):
+        return [i.strip() for i in user_input]
+
     def create_excel(self):
-        top_csv = self.view.input_boxes["input1"].text()
-        bot_csv = self.view.input_boxes["input3"].text()
-        components_top = self.view.input_boxes["input2"].text().upper().split(',')
-        components_bot = self.view.input_boxes["input4"].text().upper().split(',')
+        #get the path to a CSV file from the user
+        top_csv = self.view.input_boxes["input1"].text().strip()
+        bot_csv = self.view.input_boxes["input3"].text().strip()
+        #get the designator lists from the user and clean them up
+        designators_top = self.view.input_boxes["input2"].text().upper().split(',')
+        components_top = self.cleanup_userinput(designators_top)
+        designators_bot = self.view.input_boxes["input4"].text().upper().split(',')
+        components_bot = self.cleanup_userinput(designators_bot)
 
         self.exporter.create_msa_df()
 
