@@ -142,9 +142,10 @@ class ExcelCreator:
             self.msa_data = pd.concat([self.msa_data, filtered_data], axis=1)
 
     def create_tolerance_df(self, components):
-        n = len(components)
+        clean_components = [component for component in components if component]
+        n = len(clean_components)
         columns_with_data = {
-            'Desygnator': components,
+            'Desygnator': clean_components,
             'Obudowa': ['none' for i in range(n)],
             'Tolerancja X': [0 for i in range(n)],
             'Tolerancja Y': [0 for i in range(n)]
