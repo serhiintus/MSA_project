@@ -211,4 +211,4 @@ These files can be used to test the application without requiring real AOI machi
 
 **Serhii Provotorov**
 
-LinkedIn: https://www.linkedin.com/in/serhii-provotorov-5b621b1b1/
+LinkedIn: https://www.linkedin.com/in/serhii-provotorov/
